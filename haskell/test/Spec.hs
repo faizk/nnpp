@@ -47,3 +47,14 @@ main = hspec $ do
     describe "myReverse" $ do
       prop "must reverse any list (like reverse)" $
         \l -> P99.myReverse l `shouldBe` reverse (l :: [Double])
+
+  describe "P06 (*) Find out whether a list is a palindrome. " $ do
+    describe "isPalindrome" $ do
+      prop "any list appended to it's reverse should be seen as a palindrome" $
+        \l -> let l' = (l :: String) ++ reverse l in
+              P99.isPalindrome l' `shouldBe` True
+      prop "any list appended to it's reverse sandwiching an element should be seen as a palindrome" $
+        \l a -> let l' = (l :: String) ++ [a] ++ reverse l in
+              P99.isPalindrome l' `shouldBe` True
+      prop "any singleton list  should be seen as a palindrome" $
+        \a -> P99.isPalindrome [a::Int] `shouldBe` True

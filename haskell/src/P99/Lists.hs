@@ -4,6 +4,7 @@ module P99.Lists
     , elementAt
     , numElements
     , myReverse
+    , isPalindrome
     ) where
 
 import Numeric.Natural
@@ -31,3 +32,6 @@ numElements = num1 0 where
 myReverse :: [a] -> [a]
 myReverse = rev [] where rev soFar []     = soFar
                          rev soFar (x:xs) = rev (x:soFar) xs
+
+isPalindrome :: Eq a => [a] -> Bool
+isPalindrome l = l == myReverse l
