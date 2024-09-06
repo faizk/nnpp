@@ -36,3 +36,8 @@ main = hspec $ do
       prop "return the kth element of any list." $
         \l i -> P99.elementAt i (l::[Int]) `shouldBe`
                 lookup i ([1..] `zip` l)
+
+  describe "P04 (*) Find the number of elements of a list." $ do
+    describe "numElements" $ do
+      prop "must give you the length of the list" $
+        \l -> P99.numElements l `shouldBe` length (l :: String)
