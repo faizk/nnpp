@@ -3,6 +3,7 @@ module P99.Lists
     , lastBut1
     , elementAt
     , numElements
+    , myReverse
     ) where
 
 import Numeric.Natural
@@ -26,3 +27,7 @@ numElements :: [a] -> Int
 numElements = num1 0 where
   num1 c [] = c
   num1 c (_:rest) = num1 (c + 1) rest
+
+myReverse :: [a] -> [a]
+myReverse = rev [] where rev soFar []     = soFar
+                         rev soFar (x:xs) = rev (x:soFar) xs

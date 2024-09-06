@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 import Test.Hspec
 import Test.QuickCheck
@@ -41,3 +42,8 @@ main = hspec $ do
     describe "numElements" $ do
       prop "must give you the length of the list" $
         \l -> P99.numElements l `shouldBe` length (l :: String)
+
+  describe "P05 (*) Reverse a list." $ do
+    describe "myReverse" $ do
+      prop "must reverse any list (like reverse)" $
+        \l -> P99.myReverse l `shouldBe` reverse (l :: [Double])
