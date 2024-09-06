@@ -4,9 +4,13 @@ import Test.Hspec
 import Test.QuickCheck
 import Test.Hspec.QuickCheck
 
+import Numeric.Natural
 import Data.Maybe (isNothing)
 
 import qualified P99.Lists as P99
+
+instance Arbitrary Natural where
+  arbitrary = fromIntegral . abs <$> (arbitrary :: Gen Int)
 
 main :: IO ()
 main = hspec $ do
@@ -26,3 +30,9 @@ main = hspec $ do
         \a -> P99.lastBut1 [a::Int] `shouldBe` Nothing
       it "should return Nothing for an empty list" $ do
         P99.lastBut1 ([]::[Int]) `shouldBe` Nothing
+
+  describe "P03 (*) Find the K'th element of a list. " $ do
+    describe "elementAt" $ do
+      prop "return the kth element of any list." $
+        \l i -> P99.elementAt i (l::[Int]) `shouldBe`
+                lookup i ([1..] `zip` l)
