@@ -5,10 +5,14 @@ import Test.Hspec
 import Test.QuickCheck
 import Test.Hspec.QuickCheck
 
-import Numeric.Natural
+import Control.Exception (SomeException (SomeException))
 import Data.Maybe (isNothing)
+import Data.List (isSubsequenceOf)
+import Numeric.Natural
 
 import qualified P99.Lists as P99
+import qualified P99.Sx as Sx
+import P99.Sx (Sx(..))
 
 instance Arbitrary Natural where
   arbitrary = fromIntegral . abs <$> (arbitrary :: Gen Int)
@@ -58,3 +62,40 @@ main = hspec $ do
               P99.isPalindrome l' `shouldBe` True
       prop "any singleton list  should be seen as a palindrome" $
         \a -> P99.isPalindrome [a::Int] `shouldBe` True
+
+  describe "P07 (**) Flatten a nested list structure. " $
+    let  n :: Int -> Sx Int
+         n = Vx
+         isList = Sx.isList
+         append = Sx.append
+         bits ss got = all (`isSubsequenceOf` got) ss
+         errLike msgMatch (SomeException msg) = msgMatch $ show msg
+         fromL (x:xs) = Vx x :~ fromL xs
+         fromL [] = NIL
+    in do
+    describe "S-expressions" $ do
+      describe "show" $ do
+        it "show should render lists correctly" $ do
+          show (NIL :: Sx Int) `shouldBe` "()"
+          show (n 1 :~ n 2 :~ n 4 :~ NIL) `shouldBe` "(1 2 4)"
+          show (n 1 :~ (n 2 :~ NIL) :~ n 4 :~ NIL) `shouldBe` "(1 (2) 4)"
+          show (n 3 :~ n 1) `shouldBe` "(3 . 1)"
+        prop "show should render values correctly" $
+          \i -> show (n i) `shouldBe` show i
+      describe "isList" $ do
+        it "should detect any valid list" $ do
+          isList NIL `shouldBe` True
+          isList (n 1 :~ NIL) `shouldBe` True
+          isList ((n 1 :~ n 2) :~ NIL) `shouldBe` True
+        it "should reject any non-list" $ do
+          isList (n 7) `shouldBe` False
+          isList (Vx True) `shouldBe` False
+          isList (n 1 :~ n 2) `shouldBe` False
+      describe "append" $ do
+        it "should reject non-lists" $ do
+          append (n 1) NIL `shouldThrow` errLike (bits ["Not a list", ": 1"])
+          append NIL (n 2 :~ n 3) `shouldThrow` errLike (bits ["Not", "list", "(2 . 3)"])
+        prop "should append lists" $
+          \(l1, l2) -> do l3' <- append (fromL l1) (fromL l2)
+                          l3' `shouldBe` fromL (l1 ++ l2)
+            

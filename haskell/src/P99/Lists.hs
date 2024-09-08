@@ -9,6 +9,9 @@ module P99.Lists
 
 import Numeric.Natural
 
+import qualified P99.Sx as Sx
+import P99.Sx (Sx(..))
+
 myLast :: [a] -> Maybe a
 myLast [a] = Just a
 myLast [] = Nothing
@@ -35,3 +38,7 @@ myReverse = rev [] where rev soFar []     = soFar
 
 isPalindrome :: Eq a => [a] -> Bool
 isPalindrome l = l == myReverse l
+
+flatten :: Sx a -> Sx a
+flatten (car :~ cdr) = undefined
+flatten v = v

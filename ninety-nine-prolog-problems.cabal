@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       P99.Lists
+      P99.Sx
   other-modules:
       Paths_ninety_nine_prolog_problems
   autogen-modules:
