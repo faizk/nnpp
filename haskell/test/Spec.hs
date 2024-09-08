@@ -72,6 +72,7 @@ main = hspec $ do
          errLike msgMatch (SomeException msg) = msgMatch $ show msg
          fromL (x:xs) = Vx x :~ fromL xs
          fromL [] = NIL
+         flatten = P99.flatten
     in do
     describe "S-expressions" $ do
       describe "show" $ do
@@ -98,4 +99,16 @@ main = hspec $ do
         prop "should append lists" $
           \(l1, l2) -> do l3' <- append (fromL l1) (fromL l2)
                           l3' `shouldBe` fromL (l1 ++ l2)
-            
+    describe "flatten" $ do
+      it "should reject non-lists" $ do
+        flatten (n 1) `shouldThrow` errLike (bits ["non-list", ": 1"])
+        flatten (n 2 :~ n 3) `shouldThrow` errLike (bits ["non", "list:3"])
+      prop "should do nothing if given an already flat list" $
+        \l -> do fl <- P99.flatten (fromL (l :: [Int]))
+                 fl `shouldBe` fromL l
+      it "should flatten nested lists" $
+        let l1 = (n 1 :~ fromL [23, 45] :~ ((n 7 :~ fromL [8, 11] :~ NIL) :~ n 13 :~ NIL) :~ NIL)
+        in do
+          show l1 `shouldBe` "(1 (23 45) ((7 (8 11)) 13))"
+          fl1 <- flatten l1
+          fl1 `shouldBe` fromL [1, 23, 45, 7, 8, 11, 13]
