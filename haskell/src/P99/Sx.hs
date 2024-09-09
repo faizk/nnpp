@@ -3,6 +3,9 @@ module P99.Sx
     ( Sx(..)
     , isList
     , append
+    , fromList
+    -- redoing List problems
+    , myLast
     ) where
 
 data Sx a
@@ -38,3 +41,14 @@ append NIL sxb                = fail $ "Not a list: " ++ show sxb
 append (h :~ t) lb            = (h :~) <$> append t lb
 append sxa _                  = fail $ "Not a list: " ++ show sxa
 
+fromList :: [a] -> Sx a
+fromList = foldr ((:~) . Vx) NIL
+
+-- redoing some of the "List" problems so as to base it on this type
+
+-- P01 (*) Find the last element of a list.
+myLast :: (Show a, MonadFail m) => Sx a -> m (Sx a)
+myLast (h :~ NIL) = pure h
+myLast (_ :~ t)   = myLast t
+myLast NIL        = fail "Empty list, no last element"
+myLast sxp        = fail $ "Not a list: " ++ show sxp

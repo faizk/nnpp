@@ -20,11 +20,27 @@ instance Arbitrary Natural where
 main :: IO ()
 main = hspec $ do
   describe "P01 (*) Find the last element of a list" $ do
-
-    it "returns the last element of an *any* list" $
-      property $ \case
-        l@[] -> isNothing (P99.myLast l)
-        l    -> P99.myLast l == Just (last l :: Int)
+    describe "myLast" $ do
+      it "returns the last element of an *any* list" $
+        property $ \case
+          l@[] -> isNothing (P99.myLast l)
+          l    -> P99.myLast l == Just (last l :: Int)
+    describe "Sx.myLast" $ do
+      prop "returns the last element of an *any* uniform non-empty list" $
+        \(h,t)  -> do let l = (h:t) :: [Int]
+                          myL = Sx.fromList l
+                      got <- Sx.myLast myL
+                      got `shouldBe` Vx (last l)
+      it "should throw an error for empty lists" $ do
+        Sx.myLast (NIL :: Sx Int) `shouldThrow` errLike (bits ["Empty", "no last"])
+      it "should throw an error for non-lists" $ do
+        Sx.myLast (Vx True) `shouldThrow` errLike (bits ["Not", "a list"])
+        Sx.myLast (Vx 'a' :~ Vx 'b') `shouldThrow` errLike (bits ["Not", "a list", "'b'"])
+      it "should return the last element of non-homogenous lists" $
+        let expected = (Vx 'b' :~ Vx 'c')
+            l = (Vx 'a' :~ expected :~ NIL)
+          in do got <- Sx.myLast l
+                got `shouldBe` expected
 
   describe "P02 (*) Find the last but one element of a list. " $ do
     describe "lastBut1" $ do
@@ -68,10 +84,7 @@ main = hspec $ do
          n = Vx
          isList = Sx.isList
          append = Sx.append
-         bits ss got = all (`isSubsequenceOf` got) ss
-         errLike msgMatch (SomeException msg) = msgMatch $ show msg
-         fromL (x:xs) = Vx x :~ fromL xs
-         fromL [] = NIL
+         fromL = Sx.fromList
          flatten = P99.flatten
     in do
     describe "S-expressions" $ do
@@ -112,3 +125,10 @@ main = hspec $ do
           show l1 `shouldBe` "(1 (23 45) ((7 (8 11)) 13))"
           fl1 <- flatten l1
           fl1 `shouldBe` fromL [1, 23, 45, 7, 8, 11, 13]
+
+-- UTILS
+bits :: [String] -> String -> Bool
+bits ss got = all (`isSubsequenceOf` got) ss
+
+errLike :: (String -> Bool) -> SomeException -> Bool
+errLike msgMatch (SomeException msg) = msgMatch $ show msg
