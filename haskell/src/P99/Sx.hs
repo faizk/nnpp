@@ -6,6 +6,7 @@ module P99.Sx
     , fromList
     -- redoing List problems
     , myLast
+    , lastBut1
     ) where
 
 data Sx a
@@ -52,3 +53,11 @@ myLast (h :~ NIL) = pure h
 myLast (_ :~ t)   = myLast t
 myLast NIL        = fail "Empty list, no last element"
 myLast sxp        = fail $ "Not a list: " ++ show sxp
+
+-- P02 (*) Find the last but one element of a list.
+lastBut1 :: (Show a, MonadFail m) => Sx a -> m (Sx a)
+lastBut1 (x :~ _ :~ NIL)  = pure x
+lastBut1 small@(_ :~ NIL) = fail $ "only one element: " ++ show small
+lastBut1 (_ :~ t)         = lastBut1 t
+lastBut1 NIL              = fail "Empty list, no last element"
+lastBut1 sxp              = fail $ "Not a list: " ++ show sxp

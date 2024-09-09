@@ -51,6 +51,13 @@ main = hspec $ do
         \a -> P99.lastBut1 [a::Int] `shouldBe` Nothing
       it "should return Nothing for an empty list" $ do
         P99.lastBut1 ([]::[Int]) `shouldBe` Nothing
+    describe "Sx.lastBut1" $ do
+      prop "returns the second-last element of a big enough list" $
+        \l -> (length l >= 2) ==>
+              do let myL    = Sx.fromList (l :: [Int])
+                     expect = head $ tail $ reverse l
+                 got <- Sx.lastBut1 myL
+                 got `shouldBe` Vx expect
 
   describe "P03 (*) Find the K'th element of a list. " $ do
     describe "elementAt" $ do
