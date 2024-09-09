@@ -8,6 +8,7 @@ module P99.Sx
     , myLast
     , lastBut1
     , elementAt
+    , numElements
     ) where
 
 import Numeric.Natural (Natural)
@@ -67,8 +68,14 @@ lastBut1 sxp              = fail $ "Not a list: " ++ show sxp
 
 -- P03 (*) Find the K'th element of a list.
 elementAt :: (Show a, MonadFail m) => Natural -> Sx a -> m (Sx a)
-elementAt _ NIL                 = fail "Empty list"
 elementAt 1 (h :~ t) | isList t = return h
 elementAt i _        | i < 1    = fail $ "invalid index: " ++ show i
 elementAt i (_ :~ t)            = elementAt (i-1) t
+elementAt _ NIL                 = fail "Empty list"
 elementAt _ sxp                 = fail $ "Not a list: " ++ show sxp
+
+-- P04 (*) Find the number of elements of a list.
+numElements :: (Show a, MonadFail m) => Sx a -> m Integer
+numElements (_ :~ t)            = (1+) <$> numElements t
+numElements NIL                 = pure 0
+numElements sxp                 = fail $ "Not a list: " ++ show sxp

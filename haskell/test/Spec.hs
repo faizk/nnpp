@@ -73,6 +73,9 @@ main = hspec $ do
     describe "numElements" $ do
       prop "must give you the length of the list" $
         \l -> P99.numElements l `shouldBe` length (l :: String)
+    describe "Sx.numElements" $ do
+      prop "must give you the length of the list" $
+        \l -> Sx.numElements (Sx.fromList l) `shouldBe` Just (fromIntegral $ length (l :: String))
 
   describe "P05 (*) Reverse a list." $ do
     describe "myReverse" $ do
