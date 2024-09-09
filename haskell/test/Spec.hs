@@ -81,6 +81,10 @@ main = hspec $ do
     describe "myReverse" $ do
       prop "must reverse any list (like reverse)" $
         \l -> P99.myReverse l `shouldBe` reverse (l :: [Double])
+    describe "Sx.myReverse" $ do
+      prop "must reverse any list (like reverse)" $
+        \l -> Sx.myReverse (Sx.fromList l) `shouldBe`
+              Sx.fromList <$> Just (reverse (l :: [Double]))
 
   describe "P06 (*) Find out whether a list is a palindrome. " $ do
     describe "isPalindrome" $ do

@@ -9,6 +9,7 @@ module P99.Sx
     , lastBut1
     , elementAt
     , numElements
+    , myReverse
     ) where
 
 import Numeric.Natural (Natural)
@@ -79,3 +80,10 @@ numElements :: (Show a, MonadFail m) => Sx a -> m Integer
 numElements (_ :~ t)            = (1+) <$> numElements t
 numElements NIL                 = pure 0
 numElements sxp                 = fail $ "Not a list: " ++ show sxp
+
+-- P05 (*) Reverse a list.
+myReverse :: (Show a, MonadFail m) => Sx a -> m (Sx a)
+myReverse = rev NIL
+  where rev acc (h :~ t) = rev (h :~ acc) t
+        rev acc NIL      = pure acc
+        rev _   sxp      = fail $ "Not a list :" ++ show sxp
