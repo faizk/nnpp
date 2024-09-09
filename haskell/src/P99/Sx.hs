@@ -10,6 +10,7 @@ module P99.Sx
     , elementAt
     , numElements
     , myReverse
+    , isPalindrome
     ) where
 
 import Numeric.Natural (Natural)
@@ -87,3 +88,7 @@ myReverse = rev NIL
   where rev acc (h :~ t) = rev (h :~ acc) t
         rev acc NIL      = pure acc
         rev _   sxp      = fail $ "Not a list :" ++ show sxp
+
+-- P06 (*) Find out whether a list is a palindrome.
+isPalindrome :: (Eq a, Show a, MonadFail m) => Sx a -> m Bool
+isPalindrome lst = (lst ==) <$> myReverse lst

@@ -96,6 +96,15 @@ main = hspec $ do
               P99.isPalindrome l' `shouldBe` True
       prop "any singleton list  should be seen as a palindrome" $
         \a -> P99.isPalindrome [a::Int] `shouldBe` True
+    describe "Sx.isPalindrome" $ do
+      prop "any list appended to it's reverse should be seen as a palindrome" $
+        \l -> let l' = Sx.fromList $ (l :: String) ++ reverse l in
+              Sx.isPalindrome l' `shouldBe` Just True
+      prop "any list appended to it's reverse sandwiching an element should be seen as a palindrome" $
+        \l a -> let l' = Sx.fromList $ (l :: String) ++ [a] ++ reverse l in
+              Sx.isPalindrome l' `shouldBe` Just True
+      prop "any singleton list  should be seen as a palindrome" $
+        \a -> Sx.isPalindrome (Vx (a::Int) :~ NIL) `shouldBe`Just  True
 
   describe "P07 (**) Flatten a nested list structure. " $
     let  n :: Int -> Sx Int
