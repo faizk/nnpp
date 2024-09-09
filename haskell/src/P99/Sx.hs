@@ -7,7 +7,10 @@ module P99.Sx
     -- redoing List problems
     , myLast
     , lastBut1
+    , elementAt
     ) where
+
+import Numeric.Natural (Natural)
 
 data Sx a
   = Vx a
@@ -61,3 +64,11 @@ lastBut1 small@(_ :~ NIL) = fail $ "only one element: " ++ show small
 lastBut1 (_ :~ t)         = lastBut1 t
 lastBut1 NIL              = fail "Empty list, no last element"
 lastBut1 sxp              = fail $ "Not a list: " ++ show sxp
+
+-- P03 (*) Find the K'th element of a list.
+elementAt :: (Show a, MonadFail m) => Natural -> Sx a -> m (Sx a)
+elementAt _ NIL                 = fail "Empty list"
+elementAt 1 (h :~ t) | isList t = return h
+elementAt i _        | i < 1    = fail $ "invalid index: " ++ show i
+elementAt i (_ :~ t)            = elementAt (i-1) t
+elementAt _ sxp                 = fail $ "Not a list: " ++ show sxp
