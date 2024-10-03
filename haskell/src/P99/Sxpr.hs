@@ -18,9 +18,10 @@ module P99.Sxpr
     , isPalindrome
     , flatten
     , compress
+    , pack
     ) where
 
-import Control.Monad (join)
+import Control.Monad (join, (<=<))
 import Numeric.Natural (Natural)
 
 data Atm where
@@ -136,3 +137,12 @@ compress :: Sxpr -> Sxpr
 compress (a :~ b :~ rest) | a == b = compress (b :~ rest)
 compress (a :~ rest)               = a :~ compress rest
 compress whatever                  = whatever
+
+pack :: MonadFail m => Sxpr -> m Sxpr
+pack = myReverse <=< p NIL
+  where
+    p acc NIL = return acc
+    p (accH@(h' :~ _) :~ accT) (h :~ t) | h == h' = p ((h :~ accH) :~ accT) t
+    p acc                      (h :~ t)           = p ((h :~ NIL) :~ acc)   t
+    p _                        blah               =
+      fail $ "Can't pack a non-list: " ++ show blah

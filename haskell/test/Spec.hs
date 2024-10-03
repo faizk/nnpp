@@ -7,7 +7,7 @@ import Test.Hspec.QuickCheck
 
 import Control.Exception (SomeException (SomeException))
 import Data.Maybe (isNothing)
-import Data.List (isSubsequenceOf)
+import Data.List (isSubsequenceOf, group)
 import Numeric.Natural
 
 import qualified P99.Lists as P99
@@ -268,6 +268,19 @@ main = hspec $ do
       it "should leave tuples and atoms alone" $ do
         compress (n 1 :~ n 1) `shouldBe` (n 1 :~ n 1)
         compress (n 42) `shouldBe` n 42
+
+  describe "P09 (**) Pack consecutive duplicates of list elements into sublists. " $ do
+    describe "pack" $ do
+      prop "should behave like Data.List (group)" $ do
+        \l -> P99.pack l `shouldBe` group (l :: [Char])
+    describe "Sxpr.pack" $
+      let fromL = foldr (:~) NIL
+      in do
+      prop "should behave like Data.List (group)" $ verbose $ do
+        \l -> do
+          expected <- return $ fromL $ Sxpr.fromList <$> group (l :: [Integer])
+          got      <- Sxpr.pack (Sxpr.fromList l)
+          got `shouldBe` expected
 
 -- UTILS
 bits :: [String] -> String -> Bool

@@ -6,6 +6,7 @@ module P99.Lists
     , myReverse
     , isPalindrome
     , compress
+    , pack
     ) where
 
 import Numeric.Natural
@@ -42,3 +43,11 @@ compress :: Eq a => [a] -> [a]
 compress [] = []
 compress (a:b:rest) | a == b = compress (b:rest)
 compress (a:rest)          = a : compress rest
+
+-- P09 (**) Pack consecutive duplicates of list elements into sublists.
+pack :: Eq a => [a] -> [[a]]
+pack = reverse . p []
+  where
+    p acc []  = acc
+    p (accH@(h':_):accRest) (h:rest) | h == h' = p ((h:accH):accRest) rest
+    p acc                   (h:rest)           = p ([h]:acc)          rest
