@@ -6,6 +6,7 @@
 module P99.Sxpr
     ( Sxpr(..)
     , Atm(..)
+    , CanBeAtm, atm
     , isList
     , append
     , fromList
@@ -19,6 +20,7 @@ module P99.Sxpr
     , flatten
     , compress
     , pack
+    , encode
     ) where
 
 import Control.Monad (join, (<=<))
@@ -146,3 +148,12 @@ pack = myReverse <=< p NIL
     p acc                      (h :~ t)           = p ((h :~ NIL) :~ acc)   t
     p _                        blah               =
       fail $ "Can't pack a non-list: " ++ show blah
+
+encode :: MonadFail m => Sxpr -> m Sxpr
+encode = countAll <=< pack where
+  countAll NIL = pure NIL
+  countAll (l@(h :~ _) :~ t) | isList l = do
+    h' <- (:~ h :~ NIL) . Atm . atm <$> numElements l
+    t' <- countAll t
+    return $ h' :~ t'
+  countAll whatever = fail $ "Not a list: " ++ show whatever

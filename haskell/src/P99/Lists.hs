@@ -7,8 +7,10 @@ module P99.Lists
     , isPalindrome
     , compress
     , pack
+    , encode
     ) where
 
+import Control.Monad (join)
 import Numeric.Natural
 
 myLast :: [a] -> Maybe a
@@ -51,3 +53,9 @@ pack = reverse . p []
     p acc []  = acc
     p (accH@(h':_):accRest) (h:rest) | h == h' = p ((h:accH):accRest) rest
     p acc                   (h:rest)           = p ([h]:acc)          rest
+
+-- P10 (*) Run-length encoding of a list.
+encode :: Eq a => [a] -> [(Int, a)]
+encode = join . map cnt . pack where
+  cnt l@(a:_) = [(length l, a)]
+  cnt []      = []

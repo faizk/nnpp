@@ -16,7 +16,7 @@ import qualified P99.Sx as Sx
 import P99.Sx (Sx(Vx))
 
 import qualified P99.Sxpr as Sxpr
-import P99.Sxpr (Sxpr(..), Atm(..))
+import P99.Sxpr (Sxpr(..), Atm(..), CanBeAtm(..))
 
 instance Arbitrary Natural where
   arbitrary = fromIntegral . abs <$> (arbitrary :: Gen Int)
@@ -276,10 +276,25 @@ main = hspec $ do
     describe "Sxpr.pack" $
       let fromL = foldr (:~) NIL
       in do
-      prop "should behave like Data.List (group)" $ verbose $ do
+      prop "should behave like Data.List (group)" $ do
         \l -> do
           expected <- return $ fromL $ Sxpr.fromList <$> group (l :: [Integer])
           got      <- Sxpr.pack (Sxpr.fromList l)
+          got `shouldBe` expected
+
+  describe "P10 (*) Run-length encoding of a list. " $
+    let runLenEnc = map cnt . group
+        cnt l = (length l, head l)
+        runLenEnc' = map (\(n, x) -> Atm (I (fromIntegral n)) :~ Atm (atm x) :~ NIL) . runLenEnc
+    in do
+    describe "encode" $ do
+      prop "should behave like Data.List (group) with count" $ do
+        \l -> P99.encode l `shouldBe` runLenEnc (l :: [Bool])
+    describe "Sxpr.encode" $ do
+      prop "should behave like Data.List (group) with count" $ do
+        \l -> do
+          let expected = foldr (:~) NIL (runLenEnc' l)
+          got <- Sxpr.encode (Sxpr.fromList l)
           got `shouldBe` expected
 
 -- UTILS
