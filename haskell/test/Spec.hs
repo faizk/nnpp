@@ -11,8 +11,12 @@ import Data.List (isSubsequenceOf)
 import Numeric.Natural
 
 import qualified P99.Lists as P99
+
 import qualified P99.Sx as Sx
-import P99.Sx (Sx(..))
+import P99.Sx (Sx(Vx))
+
+import qualified P99.Sxpr as Sxpr
+import P99.Sxpr (Sxpr(..), Atm(..))
 
 instance Arbitrary Natural where
   arbitrary = fromIntegral . abs <$> (arbitrary :: Gen Int)
@@ -32,15 +36,36 @@ main = hspec $ do
                       got <- Sx.myLast myL
                       got `shouldBe` Vx (last l)
       it "should throw an error for empty lists" $ do
-        Sx.myLast (NIL :: Sx Int) `shouldThrow` errLike (bits ["Empty", "no last"])
+        Sx.myLast (Sx.NIL :: Sx Int) `shouldThrow` errLike (bits ["Empty", "no last"])
       it "should throw an error for non-lists" $ do
         Sx.myLast (Vx True) `shouldThrow` errLike (bits ["Not", "a list"])
-        Sx.myLast (Vx 'a' :~ Vx 'b') `shouldThrow` errLike (bits ["Not", "a list", "'b'"])
+        Sx.myLast (Vx 'a' Sx.:~ Vx 'b') `shouldThrow` errLike (bits ["Not", "a list", "'b'"])
       it "should return the last element of non-homogenous lists" $
-        let expected = (Vx 'b' :~ Vx 'c')
-            l = (Vx 'a' :~ expected :~ NIL)
+        let expected = (Vx 'b' Sx.:~ Vx 'c')
+            l = (Vx 'a' Sx.:~ expected Sx.:~ Sx.NIL)
           in do got <- Sx.myLast l
                 got `shouldBe` expected
+    describe "Sxpr.myLast" $
+      let b = Atm . B
+          c = Atm . C
+          s = Atm . S
+      in do
+      prop "returns the last element of an *any* uniform non-empty list" $
+        \(h,t)  -> do let l = (h:t) :: [Integer]
+                          myL = Sxpr.fromList l
+                      got <- Sxpr.myLast myL
+                      got `shouldBe` Atm (I (last l))
+      it "should throw an error for empty lists" $ do
+        Sxpr.myLast NIL `shouldThrow` errLike (bits ["Empty", "no last"])
+      it "should throw an error for non-lists" $ do
+        Sxpr.myLast (b True) `shouldThrow` errLike (bits ["Not", "a list"])
+        Sxpr.myLast (c 'a' :~ c 'b') `shouldThrow` errLike (bits ["Not", "a list", "'b'"])
+      it "should return the last element of non-homogenous lists" $
+        let expected = (c 'b' :~ s "c")
+            l = (c 'a' :~ expected :~ NIL)
+          in do got <- Sxpr.myLast l
+                got `shouldBe` expected
+
 
   describe "P02 (*) Find the last but one element of a list. " $ do
     describe "lastBut1" $ do
@@ -58,6 +83,13 @@ main = hspec $ do
                      expect = head $ tail $ reverse l
                  got <- Sx.lastBut1 myL
                  got `shouldBe` Vx expect
+    describe "Sxpr.lastBut1" $ do
+      prop "returns the second-last element of a big enough list" $
+        \l -> (length l >= 2) ==>
+              do let myL    = Sxpr.fromList (l :: [Integer])
+                     expect = head $ tail $ reverse l
+                 got <- Sxpr.lastBut1 myL
+                 got `shouldBe` Atm (I expect)
 
   describe "P03 (*) Find the K'th element of a list. " $ do
     describe "elementAt" $ do
@@ -68,6 +100,10 @@ main = hspec $ do
       prop "return the kth element of any list." $
         \l i -> Sx.elementAt i (Sx.fromList (l::[Int])) `shouldBe`
                 Vx <$> lookup i ([1..] `zip` l)
+    describe "Sxpr.elementAt" $ do
+      prop "return the kth element of any list." $
+        \l i -> Sxpr.elementAt i (Sxpr.fromList (l::[Char])) `shouldBe`
+                Atm . C <$> lookup i ([1..] `zip` l)
 
   describe "P04 (*) Find the number of elements of a list." $ do
     describe "numElements" $ do
@@ -76,6 +112,10 @@ main = hspec $ do
     describe "Sx.numElements" $ do
       prop "must give you the length of the list" $
         \l -> Sx.numElements (Sx.fromList l) `shouldBe` Just (fromIntegral $ length (l :: String))
+    describe "Sxpr.numElements" $ do
+      prop "must give you the length of the list" $
+        \l -> Sxpr.numElements (Sxpr.fromList l) `shouldBe`
+              Just (fromIntegral $ length (l :: String))
 
   describe "P05 (*) Reverse a list." $ do
     describe "myReverse" $ do
@@ -85,6 +125,10 @@ main = hspec $ do
       prop "must reverse any list (like reverse)" $
         \l -> Sx.myReverse (Sx.fromList l) `shouldBe`
               Sx.fromList <$> Just (reverse (l :: [Double]))
+    describe "Sxpr.myReverse" $ do
+      prop "must reverse any list (like reverse)" $
+        \l -> Sxpr.myReverse (Sxpr.fromList l) `shouldBe`
+              Sxpr.fromList <$> Just (reverse (l :: [Double]))
 
   describe "P06 (*) Find out whether a list is a palindrome. " $ do
     describe "isPalindrome" $ do
@@ -104,20 +148,74 @@ main = hspec $ do
         \l a -> let l' = Sx.fromList $ (l :: String) ++ [a] ++ reverse l in
               Sx.isPalindrome l' `shouldBe` Just True
       prop "any singleton list  should be seen as a palindrome" $
-        \a -> Sx.isPalindrome (Vx (a::Int) :~ NIL) `shouldBe`Just  True
+        \a -> Sx.isPalindrome (Vx (a::Int) Sx.:~ Sx.NIL) `shouldBe`Just  True
+    describe "Sxpr.isPalindrome" $ do
+      prop "any list appended to it's reverse should be seen as a palindrome" $
+        \l -> let l' = Sxpr.fromList $ (l :: String) ++ reverse l in
+              Sxpr.isPalindrome l' `shouldBe` Just True
+      prop "any list appended to it's reverse sandwiching an element should be seen as a palindrome" $
+        \l a -> let l' = Sxpr.fromList $ (l :: String) ++ [a] ++ reverse l in
+              Sxpr.isPalindrome l' `shouldBe` Just True
+      prop "any singleton list  should be seen as a palindrome" $
+        \a -> Sxpr.isPalindrome (Atm (I (a::Integer)) :~ NIL) `shouldBe`Just True
 
-  describe "P07 (**) Flatten a nested list structure. " $
-    let  n :: Int -> Sx Int
-         n = Vx
-         isList = Sx.isList
-         append = Sx.append
-         fromL = Sx.fromList
-         flatten = P99.flatten
-    in do
-    describe "S-expressions" $ do
+  describe "P07 (**) Flatten a nested list structure. " $ do
+    describe "(Sx) S-expressions" $
+      let  n :: Int -> Sx Int
+           n = Vx
+           isList = Sx.isList
+           append = Sx.append
+           fromL = Sx.fromList
+           flatten = Sx.flatten
+      in do
       describe "show" $ do
         it "show should render lists correctly" $ do
-          show (NIL :: Sx Int) `shouldBe` "()"
+          show (Sx.NIL :: Sx Int) `shouldBe` "()"
+          show (n 1 Sx.:~ n 2 Sx.:~ n 4 Sx.:~ Sx.NIL) `shouldBe` "(1 2 4)"
+          show (n 1 Sx.:~ (n 2 Sx.:~ Sx.NIL) Sx.:~ n 4 Sx.:~ Sx.NIL) `shouldBe` "(1 (2) 4)"
+          show (n 3 Sx.:~ n 1) `shouldBe` "(3 . 1)"
+        prop "show should render values correctly" $
+          \i -> show (n i) `shouldBe` show i
+      describe "isList" $ do
+        it "should detect any valid list" $ do
+          isList Sx.NIL `shouldBe` True
+          isList (n 1 Sx.:~ Sx.NIL) `shouldBe` True
+          isList ((n 1 Sx.:~ n 2) Sx.:~ Sx.NIL) `shouldBe` True
+        it "should reject any non-list" $ do
+          isList (n 7) `shouldBe` False
+          isList (Vx True) `shouldBe` False
+          isList (n 1 Sx.:~ n 2) `shouldBe` False
+      describe "append" $ do
+        it "should reject non-lists" $ do
+          append (n 1) Sx.NIL `shouldThrow` errLike (bits ["Not a list", ": 1"])
+          append Sx.NIL (n 2 Sx.:~ n 3) `shouldThrow` errLike (bits ["Not", "list", "(2 . 3)"])
+        prop "should append lists" $
+          \(l1, l2) -> do l3' <- append (fromL l1) (fromL l2)
+                          l3' `shouldBe` fromL (l1 ++ l2)
+      describe "flatten" $ do
+        it "should reject non-lists" $ do
+          flatten (n 1) `shouldThrow` errLike (bits ["non-list", ": 1"])
+          flatten (n 2 Sx.:~ n 3) `shouldThrow` errLike (bits ["non", "list:3"])
+        prop "should do nothing if given an already flat list" $
+          \l -> do fl <- Sx.flatten (fromL (l :: [Int]))
+                   fl `shouldBe` fromL l
+        it "should flatten nested lists" $
+          let l1 = (n 1 Sx.:~ fromL [23, 45] Sx.:~ ((n 7 Sx.:~ fromL [8, 11] Sx.:~ Sx.NIL) Sx.:~ n 13 Sx.:~ Sx.NIL) Sx.:~ Sx.NIL)
+          in do
+            show l1 `shouldBe` "(1 (23 45) ((7 (8 11)) 13))"
+            fl1 <- flatten l1
+            fl1 `shouldBe` fromL [1, 23, 45, 7, 8, 11, 13]
+    describe "(Sxpr) S-expressions" $
+      let  n :: Integer -> Sxpr
+           n = Atm . I
+           isList = Sxpr.isList
+           append = Sxpr.append
+           fromL = Sxpr.fromList
+           flatten = Sxpr.flatten
+      in do
+      describe "show" $ do
+        it "show should render lists correctly" $ do
+          show NIL `shouldBe` "()"
           show (n 1 :~ n 2 :~ n 4 :~ NIL) `shouldBe` "(1 2 4)"
           show (n 1 :~ (n 2 :~ NIL) :~ n 4 :~ NIL) `shouldBe` "(1 (2) 4)"
           show (n 3 :~ n 1) `shouldBe` "(3 . 1)"
@@ -130,7 +228,7 @@ main = hspec $ do
           isList ((n 1 :~ n 2) :~ NIL) `shouldBe` True
         it "should reject any non-list" $ do
           isList (n 7) `shouldBe` False
-          isList (Vx True) `shouldBe` False
+          isList (Atm $ B True) `shouldBe` False
           isList (n 1 :~ n 2) `shouldBe` False
       describe "append" $ do
         it "should reject non-lists" $ do
@@ -138,20 +236,20 @@ main = hspec $ do
           append NIL (n 2 :~ n 3) `shouldThrow` errLike (bits ["Not", "list", "(2 . 3)"])
         prop "should append lists" $
           \(l1, l2) -> do l3' <- append (fromL l1) (fromL l2)
-                          l3' `shouldBe` fromL (l1 ++ l2)
-    describe "flatten" $ do
-      it "should reject non-lists" $ do
-        flatten (n 1) `shouldThrow` errLike (bits ["non-list", ": 1"])
-        flatten (n 2 :~ n 3) `shouldThrow` errLike (bits ["non", "list:3"])
-      prop "should do nothing if given an already flat list" $
-        \l -> do fl <- P99.flatten (fromL (l :: [Int]))
-                 fl `shouldBe` fromL l
-      it "should flatten nested lists" $
-        let l1 = (n 1 :~ fromL [23, 45] :~ ((n 7 :~ fromL [8, 11] :~ NIL) :~ n 13 :~ NIL) :~ NIL)
-        in do
-          show l1 `shouldBe` "(1 (23 45) ((7 (8 11)) 13))"
-          fl1 <- flatten l1
-          fl1 `shouldBe` fromL [1, 23, 45, 7, 8, 11, 13]
+                          l3' `shouldBe` fromL ((l1 ++ l2) :: [Integer])
+      describe "flatten" $ do
+        it "should reject non-lists" $ do
+          flatten (n 1) `shouldThrow` errLike (bits ["non-list", ": 1"])
+          flatten (n 2 :~ n 3) `shouldThrow` errLike (bits ["non", "list:3"])
+        prop "should do nothing if given an already flat list" $
+          \l -> do fl <- flatten (fromL (l :: [Integer]))
+                   fl `shouldBe` fromL l
+        it "should flatten nested lists" $
+          let l1 = (n 1 :~ fromL [23, 45] :~ ((n 7 :~ fromL [8, 11] :~ NIL) :~ n 13 :~ NIL) :~ NIL)
+          in do
+            show l1 `shouldBe` "(1 (23 45) ((7 (8 11)) 13))"
+            fl1 <- flatten l1
+            fl1 `shouldBe` fromL [1, 23, 45, 7, 8, 11, 13]
 
 -- UTILS
 bits :: [String] -> String -> Bool

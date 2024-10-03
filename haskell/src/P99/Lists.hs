@@ -5,14 +5,9 @@ module P99.Lists
     , numElements
     , myReverse
     , isPalindrome
-    , flatten
     ) where
 
 import Numeric.Natural
-
-import qualified P99.Sx as Sx
-import P99.Sx (Sx(..))
-import Control.Monad (join)
 
 myLast :: [a] -> Maybe a
 myLast [a] = Just a
@@ -40,9 +35,3 @@ myReverse = rev [] where rev soFar []     = soFar
 
 isPalindrome :: Eq a => [a] -> Bool
 isPalindrome l = l == myReverse l
-
-flatten :: (Show a, MonadFail m) => Sx a -> m (Sx a)
-flatten (car :~ cdr) | Sx.isList car = join $ Sx.append <$> flatten car <*> flatten cdr
-flatten (car :~ cdr) = (car :~) <$> flatten cdr
-flatten Sx.NIL = pure Sx.NIL
-flatten x = fail $ "Can't flatten a non-list: " ++ show x

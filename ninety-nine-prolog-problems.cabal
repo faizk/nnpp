@@ -27,6 +27,7 @@ library
   exposed-modules:
       P99.Lists
       P99.Sx
+      P99.Sxpr
   other-modules:
       Paths_ninety_nine_prolog_problems
   autogen-modules:
