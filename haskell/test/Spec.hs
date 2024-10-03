@@ -251,6 +251,24 @@ main = hspec $ do
             fl1 <- flatten l1
             fl1 `shouldBe` fromL [1, 23, 45, 7, 8, 11, 13]
 
+  describe "P08 (**) Eliminate consecutive duplicates of list elements. " $ do
+    describe "compress" $ do
+      it "should behave like `uniq` (UNIX)" $ do
+        P99.compress [] `shouldBe` ([] :: [Int])
+        P99.compress "aabbbacbd" `shouldBe` "abacbd"
+    describe "Sxpr.compress" $
+      let fromL    = Sxpr.fromList
+          compress = Sxpr.compress
+          n        = Atm . I
+      in do
+      it "should behave like `uniq` (UNIX)" $ do
+        compress NIL `shouldBe` NIL
+        compress (fromL "aabbbacbd") `shouldBe` (fromL "abacbd")
+        compress (n 1 :~ n 1 :~ NIL) `shouldBe` (n 1 :~ NIL)
+      it "should leave tuples and atoms alone" $ do
+        compress (n 1 :~ n 1) `shouldBe` (n 1 :~ n 1)
+        compress (n 42) `shouldBe` n 42
+
 -- UTILS
 bits :: [String] -> String -> Bool
 bits ss got = all (`isSubsequenceOf` got) ss

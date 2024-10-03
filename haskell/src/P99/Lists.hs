@@ -5,6 +5,7 @@ module P99.Lists
     , numElements
     , myReverse
     , isPalindrome
+    , compress
     ) where
 
 import Numeric.Natural
@@ -35,3 +36,9 @@ myReverse = rev [] where rev soFar []     = soFar
 
 isPalindrome :: Eq a => [a] -> Bool
 isPalindrome l = l == myReverse l
+
+-- P08 (**) Eliminate consecutive duplicates of list elements.
+compress :: Eq a => [a] -> [a]
+compress [] = []
+compress (a:b:rest) | a == b = compress (b:rest)
+compress (a:rest)          = a : compress rest

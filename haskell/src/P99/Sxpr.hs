@@ -17,6 +17,7 @@ module P99.Sxpr
     , myReverse
     , isPalindrome
     , flatten
+    , compress
     ) where
 
 import Control.Monad (join)
@@ -130,3 +131,8 @@ flatten (car :~ cdr) | isList car = join $ append <$> flatten car <*> flatten cd
 flatten (car :~ cdr) = (car :~) <$> flatten cdr
 flatten NIL = pure NIL
 flatten x = fail $ "Can't flatten a non-list: " ++ show x
+
+compress :: Sxpr -> Sxpr
+compress (a :~ b :~ rest) | a == b = compress (b :~ rest)
+compress (a :~ rest)               = a :~ compress rest
+compress whatever                  = whatever
