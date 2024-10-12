@@ -38,4 +38,9 @@ my_flatten([H|T], F) :-
 my_flatten([H|T], [H|F]) :-
   my_flatten(T,F).
 
+% P08 (**) Eliminate consecutive duplicates of list elements.
+compress([], []).
+compress([H,H|T], T1) :- compress([H|T], T1).
+compress([H|T], [H|T1]) :- compress(T, T1).
+
 % vim: ft=prolog
