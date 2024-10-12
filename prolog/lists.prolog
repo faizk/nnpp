@@ -18,3 +18,11 @@ element_at(E, [_|Es], N) :- element_at(E, Es, M), N is M+1.
 % P04 (*) Find the number of elements of a list.
 my_length([], 0).
 my_length([_|L], N) :- my_length(L, M), N is M+1.
+
+% P05 (*) Reverse a list.
+my_reverse(L, R) :-
+  my_reverse_(L, [], R).
+my_reverse_([], Acc, Acc).
+my_reverse_([H|T], Acc, R) :- my_reverse_(T, [H|Acc], R).
+
+
