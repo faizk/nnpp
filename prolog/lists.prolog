@@ -27,3 +27,15 @@ my_reverse_([H|T], Acc, R) :- my_reverse_(T, [H|Acc], R).
 
 % P06 (*) Find out whether a list is a palindrome.
 is_palindrome(L) :- my_reverse(L, L).
+
+% P07 (**) Flatten a nested list structure.
+my_flatten([], []).
+my_flatten([H|T], F) :-
+  is_list(H),
+  my_flatten(T, F1),
+  my_flatten(H, H1),
+  append(H1, F1, F).
+my_flatten([H|T], [H|F]) :-
+  my_flatten(T,F).
+
+% vim: ft=prolog
