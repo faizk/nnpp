@@ -13,7 +13,4 @@ last_but1(LastBut1, [_ |Xs]) :- last_but1(LastBut1, Xs).
 
 % P03 (*) Find the K'th element of a list. 
 element_at(E, [E|_], 1).
-element_at(E, [_|Es], N) :-
-  M is N-1,
-  M >= 1,
-  element_at(E, Es, M).
+element_at(E, [_|Es], N) :- element_at(E, Es, M), N is M+1.
