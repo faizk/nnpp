@@ -1,5 +1,5 @@
 
-% P01 (*) Find the last element of a list. 
+% P01 (*) Find the last element of a list.
 my_last(X, [_|Y]) :- my_last(X, Y).
 my_last(X, [X]).
 
@@ -11,7 +11,7 @@ my_lastt_([X|Xs], _, Last) :- my_lastt_(Xs, X, Last).
 last_but1(LastBut1, [LastBut1,_]).
 last_but1(LastBut1, [_ |Xs]) :- last_but1(LastBut1, Xs).
 
-% P03 (*) Find the K'th element of a list. 
+% P03 (*) Find the K'th element of a list.
 element_at(E, [E|_], 1).
 element_at(E, [_|Es], N) :- element_at(E, Es, M), N is M+1.
 
@@ -25,4 +25,5 @@ my_reverse(L, R) :-
 my_reverse_([], Acc, Acc).
 my_reverse_([H|T], Acc, R) :- my_reverse_(T, [H|Acc], R).
 
-
+% P06 (*) Find out whether a list is a palindrome.
+is_palindrome(L) :- my_reverse(L, L).
