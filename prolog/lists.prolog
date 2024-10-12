@@ -14,3 +14,7 @@ last_but1(LastBut1, [_ |Xs]) :- last_but1(LastBut1, Xs).
 % P03 (*) Find the K'th element of a list. 
 element_at(E, [E|_], 1).
 element_at(E, [_|Es], N) :- element_at(E, Es, M), N is M+1.
+
+% P04 (*) Find the number of elements of a list.
+my_length([], 0).
+my_length([_|L], N) :- my_length(L, M), N is M+1.
