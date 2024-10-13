@@ -43,4 +43,11 @@ compress([], []).
 compress([H,H|T], T1) :- compress([H|T], T1).
 compress([H|T], [H|T1]) :- compress(T, T1).
 
+% P09 (**) Pack consecutive duplicates of list elements into sublists.
+% TODO: could be made 2-way?
+pack(L, R) :- pack_(L, [], R).
+pack_([], Acc, Packed) :- my_reverse(Acc, Packed).
+pack_([H|T], [[H|Hs]|Acc], Packed) :- pack_(T, [[H,H|Hs]|Acc], Packed).
+pack_([H|T], Acc, Packed) :- pack_(T, [[H]|Acc], Packed).
+
 % vim: ft=prolog
