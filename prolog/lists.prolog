@@ -50,4 +50,10 @@ pack_([], Acc, Packed) :- my_reverse(Acc, Packed).
 pack_([H|T], [[H|Hs]|Acc], Packed) :- pack_(T, [[H,H|Hs]|Acc], Packed).
 pack_([H|T], Acc, Packed) :- pack_(T, [[H]|Acc], Packed).
 
+% P10 (*) Run-length encoding of a list.
+encode(L, R) :- encode_(L, [], R).
+encode_([], Acc, E) :- my_reverse(Acc, E).
+encode_([H|T], [[H,N]|Acc], E) :- encode_(T, [[H,M]|Acc], E), M is N+1.
+encode_([H|T], Acc, E) :- encode_(T, [[H,1]|Acc], E).
+
 % vim: ft=prolog
