@@ -56,4 +56,12 @@ encode_([], Acc, E) :- my_reverse(Acc, E).
 encode_([H|T], [[H,N]|Acc], E) :- encode_(T, [[H,M]|Acc], E), M is N+1.
 encode_([H|T], Acc, E) :- encode_(T, [[H,1]|Acc], E).
 
+% P11 (*) Modified run-length encoding. 
+encode_modified(L, R) :- encode_modified_(L, [], R).
+encode_modified_([], Acc, E) :- my_reverse(Acc, E).
+
+encode_modified_([H|T], [H|Acc], E)  :- encode_modified_(T, [[2,H]|Acc], E).
+encode_modified_([H|T], [[N, H]|Acc], E) :- encode_modified_(T, [[M, H]|Acc], E), M is N+1.
+encode_modified_([H|T], Acc, E) :- encode_modified_(T, [H|Acc], E).
+
 % vim: ft=prolog
