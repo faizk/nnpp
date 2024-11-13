@@ -53,7 +53,7 @@ pack_([H|T], Acc, Packed) :- pack_(T, [[H]|Acc], Packed).
 % P10 (*) Run-length encoding of a list.
 encode(L, R) :- encode_(L, [], R).
 encode_([], Acc, E) :- my_reverse(Acc, E).
-encode_([H|T], [[H,N]|Acc], E) :- encode_(T, [[H,M]|Acc], E), M is N+1.
+encode_([H|T], [[H,N]|Acc], E) :- M is N+1, encode_(T, [[H,M]|Acc], E).
 encode_([H|T], Acc, E) :- encode_(T, [[H,1]|Acc], E).
 
 % P11 (*) Modified run-length encoding. 
@@ -61,7 +61,18 @@ encode_modified(L, R) :- encode_modified_(L, [], R).
 encode_modified_([], Acc, E) :- my_reverse(Acc, E).
 
 encode_modified_([H|T], [H|Acc], E)  :- encode_modified_(T, [[2,H]|Acc], E).
-encode_modified_([H|T], [[N, H]|Acc], E) :- encode_modified_(T, [[M, H]|Acc], E), M is N+1.
+encode_modified_([H|T], [[N, H]|Acc], E) :-
+  M is N+1,
+  encode_modified_(T, [[M, H]|Acc], E).
 encode_modified_([H|T], Acc, E) :- encode_modified_(T, [H|Acc], E).
+
+% P12 (**) Decode a run-length encoded list.
+% Given a run-length code list generated as specified in problem P11.
+% Construct its uncompressed version.
+decode_modified(L, R) :- decode_modified_(L, [], R).
+decode_modified_([], Acc, R) :- my_reverse(Acc, R).
+decode_modified_([[2,H]|T], Acc, R) :- decode_modified_([H|T], [H|Acc], R).
+decode_modified_([[N,H]|T], Acc, R) :- M is N-1, decode_modified_([[M,H]|T], [H|Acc], R).
+decode_modified_([H|T], Acc, R) :- decode_modified_(T, [H|Acc], R).
 
 % vim: ft=prolog
